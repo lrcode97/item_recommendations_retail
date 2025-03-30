@@ -74,22 +74,40 @@ class RecommendationSystem:
         print(f"\nRecommendations saved to {self.data_dir / filename}", "Number of items: ", len(recommendations_df))
 
 if __name__ == "__main__":
+
     data_dir = Path.cwd() / "data"
+    print("Loading data from: ", data_dir)
+
     items_file = "items.csv"
     model = 'sentence-transformers/all-mpnet-base-v2'
+
+
+
     RecommendationSystem = RecommendationSystem(data_dir, model)
     items_df = RecommendationSystem.load_data(items_file)
+    print("Data loaded successfully")
 
     company_names = ['Stamford Street', 'JS ', 'SSTC', 'Stamford St', 'Sainsburys']
 
     items_cleaned_name_df = RecommendationSystem.clean_names(items_df, "ITEM_NAME", company_names)
 
+    print("Cleaning item names successfully")
+
     items_with_low_super_cat = RecommendationSystem.get_low_super_cat_items(items_cleaned_name_df)
     items_with_high_super_cat = RecommendationSystem.get_high_super_cat_items(items_cleaned_name_df)
 
+    print("Items found with low super categories: ", len(items_with_low_super_cat))
+
     item_with_four_recommendations_dict = RecommendationSystem.generate_recommendations(items_with_high_super_cat)
 
+    print("Recommendations generated for items with high super categories")
+
+    print("Using sentence-transformers model to compute embeddings")
+
     RecommendationSystem.compute_embeddings(items_with_high_super_cat)
+
+    print("Embeddings computed successfully")
+    print("Finding similar items for items with low super categories using AI")
 
     for item_for_swap in items_with_low_super_cat['ITEM_NAME_CLEANED'].values:
         query = item_for_swap
@@ -106,6 +124,8 @@ if __name__ == "__main__":
         print("\nItem for swap: ", item_for_dict, 
             "\nTaking Recommendations From: ", top_cosine_item, 
             "\nRecommended Items: ", list_for_dict)
+    
+    print("Recommendations generated for items with low super categories")
         
     RecommendationSystem.save_recommendations(item_with_four_recommendations_dict, filename="recommendations_main.csv")
     
